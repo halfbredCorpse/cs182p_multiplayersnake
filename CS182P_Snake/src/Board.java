@@ -32,8 +32,6 @@ public class Board extends JPanel implements ActionListener {
     private Image ball, apple, head;
     
     public Board() {
-        initComponents();
-        
         addKeyListener(new TAdapter());
         setBackground(Color.black);
         setFocusable(true);
@@ -41,34 +39,6 @@ public class Board extends JPanel implements ActionListener {
         setPreferredSize(new Dimension(B_WIDTH, B_HEIGHT));
         loadImages();
         initGame();
-    }
-
-    @SuppressWarnings("unchecked")
-    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
-    private void initComponents() {
-
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-
-        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
-        getContentPane().setLayout(layout);
-        layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 400, Short.MAX_VALUE)
-        );
-        layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 300, Short.MAX_VALUE)
-        );
-
-        pack();
-    }// </editor-fold>//GEN-END:initComponents
-
-    public static void main(String args[]) {
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                new Board().setVisible(true);
-            }
-        });
     }
     
     private void loadImages() {
@@ -89,6 +59,11 @@ public class Board extends JPanel implements ActionListener {
             x[i] = 50 - i*10;
             y[i] = 50;
         }
+        
+        locateApple();
+        
+        timer = new Timer(DELAY, this);
+        timer.start();
     }
     
     @Override
@@ -116,7 +91,7 @@ public class Board extends JPanel implements ActionListener {
     
     private void gameOver(Graphics graphics) {
         String message = "Game Over";
-        Font small = new Font("Hellvetica", Font.BOLD, 14);
+        Font small = new Font("Helvetica", Font.BOLD, 14);
         FontMetrics metric = getFontMetrics(small);
         
         graphics.setColor(Color.white);
@@ -164,9 +139,52 @@ public class Board extends JPanel implements ActionListener {
     }
     
     private void locateApple() {
-        int r = 
+        int r = (int)(Math.random() * RAND_POS);
+        apple_x = r * DOT_SIZE;
+        
+        r = (int)(Math.random() * RAND_POS);
+        apple_y = r * DOT_SIZE;
     }
-
-    // Variables declaration - do not modify//GEN-BEGIN:variables
-    // End of variables declaration//GEN-END:variables
+    
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        if (inGame) {
+            checkApple();
+            checkCollision();
+            move();
+        }
+        
+        repaint();
+    }
+        
+    private class TAdapter extends KeyAdapter {
+        @Override
+        public void keyPressed(KeyEvent e) {
+            int key = e.getKeyCode();
+            
+            if ((key == KeyEvent.VK_LEFT) && (!rightDirection)) {
+                leftDirection = true;
+                upDirection = false;
+                downDirection = false;
+            }
+            
+            if ((key == KeyEvent.VK_RIGHT) && (!leftDirection)) {
+                rightDirection = true;
+                upDirection = false;
+                downDirection = false;
+            }
+            
+            if ((key == KeyEvent.VK_UP) && (!downDirection)) {
+                upDirection = true;
+                leftDirection = false;
+                rightDirection = false;
+            }
+            
+            if ((key == KeyEvent.VK_DOWN) && (!upDirection)) {
+                downDirection = true;
+                leftDirection = false;
+                rightDirection = false;
+            }
+        }
+    }
 }
