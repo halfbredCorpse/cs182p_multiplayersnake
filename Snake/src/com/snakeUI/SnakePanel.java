@@ -11,12 +11,14 @@ import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Image;
+import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.Timer;
 
 /**
@@ -49,14 +51,33 @@ public class SnakePanel extends javax.swing.JPanel implements ActionListener {
     private Image apple;
     private Image head;
     
+    private SnakePanel sp;
+    
+    /**
+     *
+     * @return B_WIDTH
+     */
+    public int getbWidth() {
+        return B_WIDTH;
+    }
+    
+    /**
+     *
+     * @return B_HEIGHT
+     */
+    public int getbHeight() {
+        return B_HEIGHT;
+    }
+    
     /**
      * Creates new form SnakePanel
      */
     public SnakePanel() {
         initComponents();
         
-        addKeyListener(new TAdapter());
+        addKeyListener(new ControlAdapter());
         setFocusable(true);
+        setPreferredSize(new Dimension(B_WIDTH, B_HEIGHT));
         loadImages();
         initGame();
     }
@@ -69,7 +90,7 @@ public class SnakePanel extends javax.swing.JPanel implements ActionListener {
         ImageIcon iia = new ImageIcon("apple.png");
         apple = iia.getImage();
 
-        ImageIcon iih = new ImageIcon("head.png");
+        ImageIcon iih = new ImageIcon("dot.png");
         head = iih.getImage();
     }    
     
@@ -113,16 +134,34 @@ public class SnakePanel extends javax.swing.JPanel implements ActionListener {
         } else {
 
             gameOver(g);
+            JButton btn = new JButton("Play Again");
+            btn.setSize(100, 30);
+            btn.setLocation(new Point((B_WIDTH-100) / 2, (B_HEIGHT+50) / 2));
+            btn.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    newGame();
+                }
+            });
+            this.add(btn);
         }        
+    }
+    
+    private void newGame() {
+        sp = new SnakePanel();
+        this.removeAll();
+        add(sp);
+        this.revalidate();
+        this.repaint();
+        sp.requestFocus();
     }
 
     private void gameOver(Graphics g) {
         
         String msg = "Game Over";
         Font small = new Font("Helvetica", Font.BOLD, 14);
-        FontMetrics metr = getFontMetrics(small);
-
-        g.setColor(Color.white);
+        FontMetrics metr = getFontMetrics(small);   
+        g.setColor(Color.black);
         g.setFont(small);
         g.drawString(msg, (B_WIDTH - metr.stringWidth(msg)) / 2, B_HEIGHT / 2);
     }
@@ -212,7 +251,7 @@ public class SnakePanel extends javax.swing.JPanel implements ActionListener {
         repaint();
     }
 
-    private class TAdapter extends KeyAdapter {
+    private class ControlAdapter extends KeyAdapter {
 
         @Override
         public void keyPressed(KeyEvent e) {
@@ -254,19 +293,9 @@ public class SnakePanel extends javax.swing.JPanel implements ActionListener {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        setBackground(new java.awt.Color(0, 0, 0));
+        setBackground(new java.awt.Color(255, 255, 255));
         setPreferredSize(new Dimension(B_WIDTH, B_HEIGHT));
-
-        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
-        this.setLayout(layout);
-        layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 400, Short.MAX_VALUE)
-        );
-        layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 300, Short.MAX_VALUE)
-        );
+        setLayout(new java.awt.GridLayout(1, 0));
     }// </editor-fold>//GEN-END:initComponents
 
 
