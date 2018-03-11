@@ -1,9 +1,18 @@
 import java.awt.EventQueue;
 import javax.swing.JFrame;
 
-public class Snake extends javax.swing.JFrame {
+public class Snake extends javax.swing.JFrame implements Runnable {
+    int playerStatus;
+    
     public Snake(int playerStatus) {
-        add(new Board(playerStatus));
+        this.playerStatus = playerStatus;
+    }
+
+    public void run() {
+        if (playerStatus == 0)
+            add(new Board());
+        else
+            add(new BoardOpponent());
         
         setResizable(false);
         pack();
@@ -12,7 +21,7 @@ public class Snake extends javax.swing.JFrame {
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     }
-
+    
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
@@ -41,8 +50,10 @@ public class Snake extends javax.swing.JFrame {
             public void run() {
                 player = new Snake(0);
                 opponent = new Snake(1);
-                player.setVisible(true);
-                opponent.setVisible(true);
+                new Thread(player).start();
+                new Thread(opponent).start();
+                //player.setVisible(true);
+                //opponent.setVisible(true);
             }
         });
     }

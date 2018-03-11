@@ -11,8 +11,8 @@ import java.io.*;
 
 import javax.swing.*;
 
-public class Board extends JPanel implements ActionListener {
-    private final int B_WIDTH = 300,
+public class BoardOpponent extends JPanel implements ActionListener {
+     private final int B_WIDTH = 300,
                       B_HEIGHT = 300,
                       DOT_SIZE = 10,
                       ALL_DOTS = 900,
@@ -33,25 +33,22 @@ public class Board extends JPanel implements ActionListener {
     private Timer timer;
     private Image ball, apple, head;
     
-    static ServerSocket serverSocket;
     static Socket socket;
-    static DataOutputStream output;
+    static DataInputStream input;
     
     ////////////////////////////////////////////////////////////////////////////
-    public Board() {    
+    public BoardOpponent() {
         try {
-            serverSocket = new ServerSocket(4321);
-            socket = serverSocket.accept();
+            socket = new Socket("localhost", 4321);
 
             addKeyListener(new TAdapter());
             setBackground(Color.black);
-            setFocusable(true);
 
             setPreferredSize(new Dimension(B_WIDTH, B_HEIGHT));
             loadImages();
             initGame();
         }
-        catch (Exception e) {
+        catch(Exception e) {
             JOptionPane.showMessageDialog(null, e);
         }
     }
@@ -73,38 +70,32 @@ public class Board extends JPanel implements ActionListener {
     ////////////////////////////////////////////////////////////////////////////
     private void initGame() {
         try {
-            String xArray = "", 
-                   yArray = "";
-            output = new DataOutputStream(socket.getOutputStream());
-        
-            dots = 3;
-
-            for (int i = 0; i < dots; i++) {
-                x[i] = 50 - i*10;
-                xArray += Integer.toString(x[i]) + "\t";
-                
-                y[i] = 50;
-                yArray += Integer.toString(y[i]) + "\t";
+            String xArray, yArray,
+                   xArr[], yArr[];
+            
+            input = new DataInputStream(socket.getInputStream());
+            dots = Integer.parseInt(input.readUTF());
+            
+            xArray = input.readUTF();
+            xArr = xArray.split("\t");
+            
+            yArray = input.readUTF();
+            yArr = yArray.split("\t");
+            
+            for (int i = 0; i < xArr.length; i++) {
+                x[i] = Integer.parseInt(xArr[i]);
+                y[i] = Integer.parseInt(yArr[i]);
             }
-
-            output.writeUTF(Integer.toString(dots));
-            output.flush();
             
-            output.writeUTF(xArray);
-            output.flush();
-            
-            output.writeUTF(yArray);
-            output.flush();
-            
-            output.close();
+            input.close();            
             locateApple();
-
+        
             timer = new Timer(DELAY, this);
             timer.start();
         }
         catch (IOException e) {
             JOptionPane.showMessageDialog(null, e);
-        }  
+        }        
     }
     ////////////////////////////////////////////////////////////////////////////
     
@@ -130,14 +121,14 @@ public class Board extends JPanel implements ActionListener {
             
             Toolkit.getDefaultToolkit().sync();
         }
-        else 
-            gameOver(graphics);            
+        else
+            gameOver(graphics);
     }
     ////////////////////////////////////////////////////////////////////////////
     
     ////////////////////////////////////////////////////////////////////////////
     private void gameOver(Graphics graphics) {
-        String message = "Game Over. You lost!";
+        String message = "Game Over. You won!";
         Font small = new Font("Helvetica", Font.BOLD, 14);
         FontMetrics metric = getFontMetrics(small);
         
@@ -146,7 +137,7 @@ public class Board extends JPanel implements ActionListener {
         graphics.drawString(message, (B_WIDTH - metric.stringWidth(message))/2, B_HEIGHT/2);
     }
     ////////////////////////////////////////////////////////////////////////////
-
+    
     ////////////////////////////////////////////////////////////////////////////
     private void checkApple() {
         if ((x[0] == apple_x) && (y[0] == apple_y)) {
@@ -180,22 +171,12 @@ public class Board extends JPanel implements ActionListener {
     ////////////////////////////////////////////////////////////////////////////
     private void checkCollision() {
         try {
-            output = new DataOutputStream(socket.getOutputStream());
-            
-            for (int i = dots; i > 0; i--) {
-                if ((i > 4) && (x[0] == x[i]) && (y[0] == y[i])) {
-                    inGame = false;
-                    output.writeUTF("-1");
-                    output.flush();
-                }        
-            }
-
-            if (((y[0] >= B_HEIGHT) | (y[0] < 0)) | ((x[0] >= B_WIDTH) | (x[0] < 0))) {
+            input = new DataInputStream(socket.getInputStream());
+            if (input.readUTF().equals("-1"))
                 inGame = false;
-                output.writeUTF("-1");
-                output.flush();
-            }
-                
+            
+            input.close();
+            
             if (!inGame)
                 timer.stop();
         }
@@ -208,19 +189,11 @@ public class Board extends JPanel implements ActionListener {
     ////////////////////////////////////////////////////////////////////////////
     private void locateApple() {
         try {
-            output = new DataOutputStream(socket.getOutputStream());
-            
-            int r = (int)(Math.random() * RAND_POS);
-            apple_x = r * DOT_SIZE;
-            output.writeUTF(Integer.toString(apple_x));
-            output.flush();
+            input = new DataInputStream(socket.getInputStream());
+            apple_x = Integer.parseInt(input.readUTF());
+            apple_y = Integer.parseInt(input.readUTF());
 
-            r = (int)(Math.random() * RAND_POS);
-            apple_y = r * DOT_SIZE;
-            output.writeUTF(Integer.toString(apple_y));
-            output.flush();
-            
-            output.close();
+            input.close();
         }
         catch (IOException e) {
             JOptionPane.showMessageDialog(null, e);
@@ -232,65 +205,44 @@ public class Board extends JPanel implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
         if (inGame) {
-            checkApple();     ////////////////////////////////////////////////// 
+            checkApple();
             checkCollision();
             move();
         }
         
         repaint();
     }
-    ////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////    
     
-    ////////////////////////////////////////////////////////////////////////////
+    
     private class TAdapter extends KeyAdapter {
         @Override
         public void keyPressed(KeyEvent e) {
             int key = e.getKeyCode();
 
-            try {
-                output = new DataOutputStream(socket.getOutputStream());
-                
-                if ((key == KeyEvent.VK_LEFT) && (!rightDirection)) {
-                    leftDirection = true;
-                    upDirection = false;
-                    downDirection = false;
-
-                    output.writeUTF("1");
-                    output.flush();
-                }
-
-                if ((key == KeyEvent.VK_RIGHT) && (!leftDirection)) {
-                    rightDirection = true;
-                    upDirection = false;
-                    downDirection = false;
-
-                    output.writeUTF("3");
-                    output.flush();
-                }
-
-                if ((key == KeyEvent.VK_UP) && (!downDirection)) {
-                    upDirection = true;
-                    leftDirection = false;
-                    rightDirection = false;
-
-                    output.writeUTF("2");
-                    output.flush();
-                }
-
-                if ((key == KeyEvent.VK_DOWN) && (!upDirection)) {
-                    downDirection = true;
-                    leftDirection = false;
-                    rightDirection = false;
-
-                    output.writeUTF("4");
-                    output.flush();
-                }
-                
-                output.close();
+            if ((key == KeyEvent.VK_LEFT) && (!rightDirection)) {
+                leftDirection = true;
+                upDirection = false;
+                downDirection = false;
             }
-            catch (IOException evt) {
-                JOptionPane.showMessageDialog(null, evt);
-            }                
+
+            if ((key == KeyEvent.VK_RIGHT) && (!leftDirection)) {
+                rightDirection = true;
+                upDirection = false;
+                downDirection = false;
+            }
+
+            if ((key == KeyEvent.VK_UP) && (!downDirection)) {
+                upDirection = true;
+                leftDirection = false;
+                rightDirection = false;
+            }
+
+            if ((key == KeyEvent.VK_DOWN) && (!upDirection)) {
+                downDirection = true;
+                leftDirection = false;
+                rightDirection = false;
+            }
         }
     }
 }
