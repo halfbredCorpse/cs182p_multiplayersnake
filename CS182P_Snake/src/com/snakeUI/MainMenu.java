@@ -126,11 +126,10 @@ public class MainMenu extends javax.swing.JFrame {
             mainPanel.revalidate();
             mainPanel.repaint();
             
-            JPanel playerPanel = new PlayerChoicePanel();
-            playerPanel.setLocation(270, 250);
-            playerPanel.setSize(300, 100);
+            JPanel playerPanel = new PlayerName();
+            playerPanel.setLocation(160, 220);
+            playerPanel.setSize(500, 200);
             mainPanel.add(playerPanel);
-            playerPanel.requestFocus();
         }
     }//GEN-LAST:event_formKeyPressed
 
