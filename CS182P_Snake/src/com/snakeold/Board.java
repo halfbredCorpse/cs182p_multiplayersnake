@@ -1,4 +1,4 @@
-package com.snake;
+package com.snakeold;
 
 import java.awt.Color;
 import java.awt.Dimension;

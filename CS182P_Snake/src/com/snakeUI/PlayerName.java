@@ -11,6 +11,8 @@ import javax.swing.SwingUtilities;
 import java.io.*;
 import java.util.ArrayList;
 
+import com.snake.Snake_UI;
+
 /**
  *
  * @author Jasmin Rose
@@ -18,11 +20,27 @@ import java.util.ArrayList;
 public class PlayerName extends javax.swing.JPanel {
     
     FontChooser f = new FontChooser();
-    
+    List<String> playerNames = new ArrayList();
+    String message = "";
     /**
      * Creates new form PlayerPanel
      */
     public PlayerName() {
+         try (BufferedReader br = new BufferedReader(new FileReader("txts/players.txt"))) {
+            String line;
+    
+            while((line=br.readLine()) != null) {
+                playerNames.add(line);
+            }
+            
+            for(String playerName:playerNames) {
+                message += playerName + "\n";
+            }
+        }
+        catch(IOException e) {
+            e.printStackTrace();
+        }                
+         
         initComponents();
     }
 
@@ -39,6 +57,7 @@ public class PlayerName extends javax.swing.JPanel {
         jTextField1 = new javax.swing.JTextField();
         jButton1 = new javax.swing.JButton();
         jButton2 = new javax.swing.JButton();
+        jButton3 = new javax.swing.JButton();
 
         setBackground(new java.awt.Color(0, 33, 0));
 
@@ -73,6 +92,16 @@ public class PlayerName extends javax.swing.JPanel {
             }
         });
 
+        jButton3.setBackground(new java.awt.Color(0, 238, 0));
+        jButton3.setFont(f.returnFont("joystix monospace.ttf", 16f));
+        jButton3.setForeground(new java.awt.Color(0, 33, 0));
+        jButton3.setText("UNREGISTER PLAYER");
+        jButton3.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton3ActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -85,7 +114,8 @@ public class PlayerName extends javax.swing.JPanel {
                         .addComponent(jLabel1)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jTextField1))
-                    .addComponent(jButton2, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 364, Short.MAX_VALUE))
+                    .addComponent(jButton2, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 364, Short.MAX_VALUE)
+                    .addComponent(jButton3, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 364, Short.MAX_VALUE))
                 .addGap(24, 24, 24))
         );
         layout.setVerticalGroup(
@@ -97,9 +127,11 @@ public class PlayerName extends javax.swing.JPanel {
                     .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(12, 12, 12)
                 .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(5, 5, 5)
+                .addComponent(jButton3)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jButton2)
-                .addContainerGap(142, Short.MAX_VALUE))
+                .addContainerGap(112, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
 
@@ -109,44 +141,60 @@ public class PlayerName extends javax.swing.JPanel {
             JOptionPane.showMessageDialog(null, "Please input a name.", "Input Name", JOptionPane.WARNING_MESSAGE);
         else {
             try(BufferedWriter br = new BufferedWriter(new FileWriter("txts/players.txt", true))) {
-                br.write(jTextField1.getText()+"\n");
+                br.write(jTextField1.getText().toUpperCase()+"\n");
             }
             catch(IOException e) {
                 e.printStackTrace();
             }
             
             SwingUtilities. windowForComponent(this).dispose();
-            new Snake_UI().setVisible(true);
+            Snake_UI s = new Snake_UI();
+            s.setVisible(true);
         }
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
-        // TODO add your handling code here:
-        try (BufferedReader br = new BufferedReader(new FileReader("txts/players.txt"))) {
-            String line;
-            List<String> playerNames = new ArrayList();
-            
-            while((line=br.readLine()) != null) {
-                playerNames.add(line);
-            }
-            
-            String message = "";
-            
-            for(String playerName:playerNames) {
-                message += playerName + "\n";
-            }
-            
-            JOptionPane.showMessageDialog(null, message, "Registered Players", JOptionPane.PLAIN_MESSAGE);
+        message = "";
+        for(String playerName:playerNames) {
+            message += playerName + "\n";
         }
-        catch(IOException e) {
-            e.printStackTrace();
-        }
+        JOptionPane.showMessageDialog(null, message, "Registered Players", JOptionPane.PLAIN_MESSAGE);
     }//GEN-LAST:event_jButton2ActionPerformed
+
+    private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
+        // TODO add your handling code here:
+        
+        if(jTextField1.getText().equals(""))
+            JOptionPane.showMessageDialog(null, "Please input a name.", "Input Name", JOptionPane.WARNING_MESSAGE);
+        else if(playerNames.contains(jTextField1.getText().toUpperCase())) {
+            playerNames.remove(jTextField1.getText().toUpperCase());
+            
+            File temp = new File("txts/temp.txt");
+            
+            try(BufferedWriter bw = new BufferedWriter(new FileWriter(temp,true))){
+                for(String playerName:playerNames) {
+                    bw.write(playerName + "\n");
+                }
+            }
+            catch(IOException e) {
+                e.printStackTrace();
+            }
+            
+            new File("txts/players.txt").delete();
+            temp.renameTo(new File("txts/players.txt"));
+            
+            JOptionPane.showMessageDialog(null, "Successfully removed " + jTextField1.getText() + " from players list!");
+            jTextField1.setText("");
+        }
+        else 
+            JOptionPane.showMessageDialog(null, jTextField1.getText().toUpperCase() + " is not in the players list.");
+    }//GEN-LAST:event_jButton3ActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
+    private javax.swing.JButton jButton3;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JTextField jTextField1;
     // End of variables declaration//GEN-END:variables

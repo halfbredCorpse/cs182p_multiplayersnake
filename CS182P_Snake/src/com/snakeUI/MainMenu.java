@@ -127,8 +127,8 @@ public class MainMenu extends javax.swing.JFrame {
             mainPanel.repaint();
             
             JPanel playerPanel = new PlayerName();
-            playerPanel.setLocation(160, 220);
-            playerPanel.setSize(500, 200);
+            playerPanel.setLocation(160, 190);
+            playerPanel.setSize(500, 350);
             mainPanel.add(playerPanel);
             playerPanel.requestFocusInWindow();
         }

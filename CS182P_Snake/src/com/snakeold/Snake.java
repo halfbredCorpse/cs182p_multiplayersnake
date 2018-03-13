@@ -1,7 +1,5 @@
-package com.snake;
+package com.snakeold;
 
-import com.snake.Board;
-import com.snake.Board;
 import java.awt.EventQueue;
 import javax.swing.JFrame;
 
