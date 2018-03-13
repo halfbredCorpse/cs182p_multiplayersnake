@@ -40,12 +40,17 @@ public class SnakePanel extends javax.swing.JPanel implements ActionListener, Ru
 
     private Timer timer;
     private Image ball, apple, head;
+    private String keyString;
     
     private SnakePanel sp;
     private ServerSocket serverSocket;
     private Socket socket;
     private DataOutputStream output;
     private ControlAdapter controller;
+    
+    private DatagramSocket datagramSocket;
+    private DatagramPacket packet;
+    private InetAddress ipadd;
     
     /**
      *
@@ -79,7 +84,7 @@ public class SnakePanel extends javax.swing.JPanel implements ActionListener, Ru
         loadImages();
         initGame();
         
-        new Thread(controller).start();
+        //new Thread(controller).start();
     }
     
     private void loadImages() {
@@ -99,12 +104,22 @@ public class SnakePanel extends javax.swing.JPanel implements ActionListener, Ru
             socket = serverSocket.accept();
             output = new DataOutputStream(socket.getOutputStream());
             
+            datagramSocket = new DatagramSocket();
+            try {
+                ipadd = InetAddress.getLocalHost();
+            }
+            catch (UnknownHostException e) {
+                JOptionPane.showMessageDialog(null, e);
+            }
+            
             String xArray = "", 
                    yArray = "";
             
             dots = 3;
-            output.writeUTF(Integer.toString(dots));
-            output.flush();
+            //output.writeUTF(Integer.toString(dots));
+            //output.flush();
+            packet = new DatagramPacket(Integer.toString(dots).getBytes(), Integer.toString(dots).length(), ipadd, 4321);
+            datagramSocket.send(packet);
             
             for (int i = 0; i < dots; i++) {
                 x[i] = 50 - i * 10;
@@ -114,11 +129,19 @@ public class SnakePanel extends javax.swing.JPanel implements ActionListener, Ru
                 yArray += Integer.toString(y[i]) + "\t";
             }
 
+            /*
             output.writeUTF(xArray);
             output.flush();
+            */
+            packet = new DatagramPacket(xArray.getBytes(), xArray.length(), ipadd, 4321);
+            datagramSocket.send(packet);
             
+            /*
             output.writeUTF(yArray);
             output.flush();
+            */
+            packet = new DatagramPacket(yArray.getBytes(), yArray.length(), ipadd, 4321);
+            datagramSocket.send(packet);
             
             locateApple();
 
@@ -191,6 +214,8 @@ public class SnakePanel extends javax.swing.JPanel implements ActionListener, Ru
     }
 
     private void move() {
+        keyString = "";
+        
         for (int z = dots; z > 0; z--) {
             x[z] = x[(z - 1)];
             
@@ -208,6 +233,14 @@ public class SnakePanel extends javax.swing.JPanel implements ActionListener, Ru
 
         if (downDirection) 
             y[0] += DOT_SIZE;
+        
+        try {
+            packet = new DatagramPacket(keyString.getBytes(), keyString.length(), ipadd, 4321);
+            datagramSocket.send(packet);
+        }
+        catch (IOException e) {
+            JOptionPane.showMessageDialog(null, e);
+        }
     }
 
     private void checkCollision() {
@@ -215,19 +248,39 @@ public class SnakePanel extends javax.swing.JPanel implements ActionListener, Ru
             for (int z = dots; z > 0; z--) {
                 if ((z > 4) && (x[0] == x[z]) && (y[0] == y[z])) {
                     inGame = false;
+                    
+                    /*
                     output.writeUTF("-1");
                     output.flush();
+                    */
+                    
+                    packet = new DatagramPacket("-1".getBytes(),"-1".length(), ipadd, 4321);
+                    datagramSocket.send(packet);
                 }
             }
 
             if ((y[0] >= B_HEIGHT) | (y[0] < 0) | (x[0] >= B_WIDTH) | (x[0] < 0)) {
                 inGame = false;
+                
+                /*
                 output.writeUTF("-1");
                 output.flush();
+                */
+                
+                packet = new DatagramPacket("-1".getBytes(), "-1".length(), ipadd, 4321);
+                datagramSocket.send(packet);
             }
 
-            if (inGame)
-                output.writeUTF("0");
+            if (inGame) {
+                /*
+                    output.writeUTF("0");
+                    output.flush();
+                */
+                
+                packet = new DatagramPacket("0".getBytes(), "0".length(), ipadd, 4321);
+                datagramSocket.send(packet);
+            }
+                
             else
                 timer.stop();
         }
@@ -240,13 +293,21 @@ public class SnakePanel extends javax.swing.JPanel implements ActionListener, Ru
         try {
             int r = (int) (Math.random() * RAND_POS);
             apple_x = ((r * DOT_SIZE));
+            /*
             output.writeUTF(Integer.toString(apple_x));
             output.flush();
-
+            */
+            packet = new DatagramPacket(Integer.toString(apple_x).getBytes(), Integer.toString(apple_x).length(), ipadd, 4321);
+            datagramSocket.send(packet);
+            
             r = (int) (Math.random() * RAND_POS);
             apple_y = ((r * DOT_SIZE));
+            /*
             output.writeUTF(Integer.toString(apple_y));
             output.flush();
+            */
+            packet = new DatagramPacket(Integer.toString(apple_y).getBytes(), Integer.toString(apple_y).length(), ipadd, 4321);
+            datagramSocket.send(packet);
         }
         catch (IOException e) {
             JOptionPane.showMessageDialog(null, e); 
@@ -265,20 +326,23 @@ public class SnakePanel extends javax.swing.JPanel implements ActionListener, Ru
     }
 
     private class ControlAdapter extends KeyAdapter implements Runnable {
-        KeyEvent evt;
-        
-        public void run() {    
+        public void run() {
+            /*
             try {
                 do {
-                    if (evt == null) {
-                        output.writeUTF("");
-                        output.flush();
-                    }
+                    /*
+                    output.writeUTF("");
+                    output.flush();
+                    **
+                    packet = new DatagramPacket("".getBytes(), "".length(), ipadd, 4321);
+                    datagramSocket.send(packet);
+                    
                 } while (inGame);
             }
             catch (IOException e) {
                 JOptionPane.showMessageDialog(null, e);
-            }       
+            }
+            */
         }
         
         @Override
@@ -291,8 +355,16 @@ public class SnakePanel extends javax.swing.JPanel implements ActionListener, Ru
                     upDirection = false;
                     downDirection = false;
                     
+                    //keyString = "1";
+                    /*
                     output.writeUTF("1");   
                     output.flush();
+                    */
+                    
+                    
+                    packet = new DatagramPacket("1".getBytes(), "1".length(), ipadd, 4321);
+                    datagramSocket.send(packet);
+    
                 }
 
                 if  ((key == KeyEvent.VK_RIGHT) && (!leftDirection)) {
@@ -300,8 +372,16 @@ public class SnakePanel extends javax.swing.JPanel implements ActionListener, Ru
                     upDirection = false;
                     downDirection = false;
                     
+                    //keyString = "3";
+                    /*
                     output.writeUTF("3");   
                     output.flush();
+                    */
+                    
+                    
+                    packet = new DatagramPacket("3".getBytes(), "3".length(), ipadd, 4321);
+                    datagramSocket.send(packet);
+                    
                 }
 
                 if ((key == KeyEvent.VK_UP) && (!downDirection)) {
@@ -309,8 +389,16 @@ public class SnakePanel extends javax.swing.JPanel implements ActionListener, Ru
                     rightDirection = false;
                     leftDirection = false;
                     
+                    //keyString = "2";
+                    /*
                     output.writeUTF("2");
                     output.flush();
+                    */
+                    
+                    
+                    packet = new DatagramPacket("2".getBytes(), "2".length(), ipadd, 4321);
+                    datagramSocket.send(packet);
+                    
                 }
 
                 if ((key == KeyEvent.VK_DOWN) && (!upDirection)) {
@@ -318,9 +406,18 @@ public class SnakePanel extends javax.swing.JPanel implements ActionListener, Ru
                     rightDirection = false;
                     leftDirection = false;
                     
+                   // keyString = "4";
+                    
+                    /*
                     output.writeUTF("4");
                     output.flush();
-                }
+                    */
+                    
+                    
+                    packet = new DatagramPacket("4".getBytes(), "4".length(), ipadd, 4321);
+                    datagramSocket.send(packet);
+                    
+                }   
             }
             catch (IOException evt) {
                 JOptionPane.showMessageDialog(null, evt);

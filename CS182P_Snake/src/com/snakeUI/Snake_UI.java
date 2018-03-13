@@ -2,6 +2,7 @@ package com.snakeUI;
 
 import java.awt.Dimension;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 public class Snake_UI extends javax.swing.JFrame {
@@ -31,7 +32,11 @@ public class Snake_UI extends javax.swing.JFrame {
                opponent = new Thread(sop);
         
         player.start();
+
         opponent.start();
+        
+        
+        
         
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);        
