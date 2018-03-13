@@ -10,8 +10,6 @@ import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.Timer;
@@ -19,12 +17,11 @@ import javax.swing.JOptionPane;
 import java.io.*;
 import java.net.*;
 
-public class SnakePanel extends javax.swing.JPanel implements ActionListener, Runnable {
+public class SnakeOpponentPanel extends javax.swing.JPanel implements ActionListener, Runnable {
     private final int B_WIDTH = 300,
                       B_HEIGHT = 300,
                       DOT_SIZE = 10,
                       ALL_DOTS = 900,
-                      RAND_POS = 29,
                       DELAY = 100;
 
     private final int x[] = new int[ALL_DOTS],
@@ -41,11 +38,10 @@ public class SnakePanel extends javax.swing.JPanel implements ActionListener, Ru
     private Timer timer;
     private Image ball, apple, head;
     
-    private SnakePanel sp;
-    private ServerSocket serverSocket;
-    private Socket socket;
-    private DataOutputStream output;
-    private ControlAdapter controller;
+    private SnakeOpponentPanel sop;
+    private static Socket socket;
+    private static DataInputStream input;
+    private String key;
     
     /**
      *
@@ -66,20 +62,17 @@ public class SnakePanel extends javax.swing.JPanel implements ActionListener, Ru
     /**
      * Creates new form SnakePanel
      */
-    public SnakePanel() {
-        initComponents(); 
-    }
+    public SnakeOpponentPanel() {
+        initComponents();
+    }    
     
     public void run() {
-        controller = new ControlAdapter();
-        
-        addKeyListener(controller);
         setFocusable(true);
         setPreferredSize(new Dimension(B_WIDTH, B_HEIGHT));
         loadImages();
-        initGame();
+        initGame();  
         
-        new Thread(controller).start();
+        new CheckMove().start();
     }
     
     private void loadImages() {
@@ -95,35 +88,37 @@ public class SnakePanel extends javax.swing.JPanel implements ActionListener, Ru
     
     private void initGame() {
         try {
-            serverSocket = new ServerSocket(4321);
-            socket = serverSocket.accept();
-            output = new DataOutputStream(socket.getOutputStream());
+            socket = new Socket("localhost", 4321);
+            input = new DataInputStream(socket.getInputStream());
             
-            String xArray = "", 
-                   yArray = "";
+            String xArray, yArray,
+                   xArr[], yArr[];
             
-            dots = 3;
-            output.writeUTF(Integer.toString(dots));
-            output.flush();
-            
-            for (int i = 0; i < dots; i++) {
-                x[i] = 50 - i * 10;
-                xArray += Integer.toString(x[i]) + "\t";
+            dots = Integer.parseInt(input.readUTF());
 
-                y[i] = 50;
-                yArray += Integer.toString(y[i]) + "\t";
+            xArray = input.readUTF();
+            xArr = xArray.split("\t");
+            
+            yArray = input.readUTF();
+            yArr = yArray.split("\t");
+            
+            for (int i = 0; i < xArr.length; i++) {
+                if (xArr[i].equals(""))
+                    x[i] = 0;
+                else
+                    x[i] = Integer.parseInt(xArr[i]);
+                
+                if (yArr[i].equals(""))
+                    y[i] = 0;
+                else
+                    y[i] = Integer.parseInt(yArr[i]);
             }
 
-            output.writeUTF(xArray);
-            output.flush();
-            
-            output.writeUTF(yArray);
-            output.flush();
-            
             locateApple();
 
             timer = new Timer(DELAY, this);
             timer.start();
+
         }
         catch (IOException e) {
             JOptionPane.showMessageDialog(null, e);
@@ -166,16 +161,16 @@ public class SnakePanel extends javax.swing.JPanel implements ActionListener, Ru
     }
     
     private void newGame() {
-        sp = new SnakePanel();
+        sop = new SnakeOpponentPanel();
         this.removeAll();
-        add(sp);
+        add(sop);
         this.revalidate();
         this.repaint();
-        sp.requestFocus();
+        sop.requestFocus();
     }
 
     private void gameOver(Graphics g) {
-        String msg = "Game Over. You LOST!";
+        String msg = "Game Over. You WON!";
         Font small = new Font("Helvetica", Font.BOLD, 14);
         FontMetrics metr = getFontMetrics(small);   
         g.setColor(Color.black);
@@ -193,11 +188,10 @@ public class SnakePanel extends javax.swing.JPanel implements ActionListener, Ru
     private void move() {
         for (int z = dots; z > 0; z--) {
             x[z] = x[(z - 1)];
-            
             y[z] = y[(z - 1)];
         }
 
-        if (leftDirection) 
+        if (leftDirection)
             x[0] -= DOT_SIZE;
 
         if (rightDirection)
@@ -206,50 +200,34 @@ public class SnakePanel extends javax.swing.JPanel implements ActionListener, Ru
         if (upDirection) 
             y[0] -= DOT_SIZE;
 
-        if (downDirection) 
+        if (downDirection)
             y[0] += DOT_SIZE;
     }
 
     private void checkCollision() {
         try {
-            for (int z = dots; z > 0; z--) {
-                if ((z > 4) && (x[0] == x[z]) && (y[0] == y[z])) {
-                    inGame = false;
-                    output.writeUTF("-1");
-                    output.flush();
-                }
-            }
-
-            if ((y[0] >= B_HEIGHT) | (y[0] < 0) | (x[0] >= B_WIDTH) | (x[0] < 0)) {
+            String check = input.readUTF();
+            
+            if (check.equals("0"))
+                inGame = true;
+            else if (input.readUTF().equals("-1"))
                 inGame = false;
-                output.writeUTF("-1");
-                output.flush();
-            }
-
-            if (inGame)
-                output.writeUTF("0");
-            else
+            
+            if (!inGame)
                 timer.stop();
         }
         catch (IOException e) {
             JOptionPane.showMessageDialog(null, e);
-        }   
+        }
     }
 
     private void locateApple() {
         try {
-            int r = (int) (Math.random() * RAND_POS);
-            apple_x = ((r * DOT_SIZE));
-            output.writeUTF(Integer.toString(apple_x));
-            output.flush();
-
-            r = (int) (Math.random() * RAND_POS);
-            apple_y = ((r * DOT_SIZE));
-            output.writeUTF(Integer.toString(apple_y));
-            output.flush();
+            apple_x = Integer.parseInt(input.readUTF());
+            apple_y = Integer.parseInt(input.readUTF());
         }
-        catch (IOException e) {
-            JOptionPane.showMessageDialog(null, e); 
+        catch (IOException e) { 
+            JOptionPane.showMessageDialog(null, e);
         }
     }
 
@@ -263,68 +241,41 @@ public class SnakePanel extends javax.swing.JPanel implements ActionListener, Ru
 
         repaint();
     }
-
-    private class ControlAdapter extends KeyAdapter implements Runnable {
-        KeyEvent evt;
-        
-        public void run() {    
+    
+    public class CheckMove extends Thread {
+        public void run() {
             try {
                 do {
-                    if (evt == null) {
-                        output.writeUTF("");
-                        output.flush();
+                    key = input.readUTF();
+                    
+                    if ((key.equals("1")) && (!rightDirection)) {
+                        leftDirection = true;
+                        upDirection = false;
+                        downDirection = false;
                     }
+
+                    if ((key.equals("3")) && (!leftDirection)) {
+                        rightDirection = true;
+                        upDirection = false;
+                        downDirection = false;
+                    }
+
+                    if ((key.equals("2")) && (!downDirection)) {
+                        upDirection = true;
+                        rightDirection = false;
+                        leftDirection = false;
+                    }
+
+                    if ((key.equals("4")) && (!upDirection)) {
+                        downDirection = true;
+                        rightDirection = false;
+                        leftDirection = false;
+                    } 
                 } while (inGame);
             }
             catch (IOException e) {
-                JOptionPane.showMessageDialog(null, e);
-            }       
-        }
-        
-        @Override
-        public void keyPressed(KeyEvent e) {
-            int key = e.getKeyCode();
-
-            try {
-                if ((key == KeyEvent.VK_LEFT) && (!rightDirection)) {
-                    leftDirection = true;
-                    upDirection = false;
-                    downDirection = false;
-                    
-                    output.writeUTF("1");   
-                    output.flush();
-                }
-
-                if  ((key == KeyEvent.VK_RIGHT) && (!leftDirection)) {
-                    rightDirection = true;
-                    upDirection = false;
-                    downDirection = false;
-                    
-                    output.writeUTF("3");   
-                    output.flush();
-                }
-
-                if ((key == KeyEvent.VK_UP) && (!downDirection)) {
-                    upDirection = true;
-                    rightDirection = false;
-                    leftDirection = false;
-                    
-                    output.writeUTF("2");
-                    output.flush();
-                }
-
-                if ((key == KeyEvent.VK_DOWN) && (!upDirection)) {
-                    downDirection = true;
-                    rightDirection = false;
-                    leftDirection = false;
-                    
-                    output.writeUTF("4");
-                    output.flush();
-                }
-            }
-            catch (IOException evt) {
-                JOptionPane.showMessageDialog(null, evt);
-            }            
+                JOptionPane.showMessageDialog(null, e);    
+            }   
         }
     }
     

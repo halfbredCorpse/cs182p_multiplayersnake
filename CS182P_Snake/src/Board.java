@@ -42,6 +42,7 @@ public class Board extends JPanel implements ActionListener {
         try {
             serverSocket = new ServerSocket(4321);
             socket = serverSocket.accept();
+            output = new DataOutputStream(socket.getOutputStream());
 
             addKeyListener(new TAdapter());
             setBackground(Color.black);
@@ -232,9 +233,9 @@ public class Board extends JPanel implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
         if (inGame) {
-            checkApple();     ////////////////////////////////////////////////// 
-            checkCollision();
-            move();
+            checkApple();     //////////////////////////////////////////////////
+            checkCollision(); //////////////////////////////////////////////////
+            move();           //////////////////////////////////////////////////
         }
         
         repaint();

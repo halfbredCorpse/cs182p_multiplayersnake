@@ -16,13 +16,12 @@ public class BoardOpponent extends JPanel implements ActionListener {
                       B_HEIGHT = 300,
                       DOT_SIZE = 10,
                       ALL_DOTS = 900,
-                      RAND_POS = 29,
                       DELAY = 140;
     
     private final int[] x = new int[ALL_DOTS],
                         y = new int[ALL_DOTS];
     
-    private int dots, apple_x, apple_y, playerStatus;
+    private int dots, apple_x, apple_y;
     
     private boolean leftDirection = false,
                     rightDirection = true,
@@ -190,7 +189,7 @@ public class BoardOpponent extends JPanel implements ActionListener {
     private void locateApple() {
         try {
             input = new DataInputStream(socket.getInputStream());
-            apple_x = Integer.parseInt(input.readUTF());
+            apple_x = Integer.parseInt(input.readUTF() );
             apple_y = Integer.parseInt(input.readUTF());
 
             input.close();
@@ -218,30 +217,36 @@ public class BoardOpponent extends JPanel implements ActionListener {
     private class TAdapter extends KeyAdapter {
         @Override
         public void keyPressed(KeyEvent e) {
-            int key = e.getKeyCode();
+            try {
+                input = new DataInputStream(socket.getInputStream());
+                String key = input.readUTF();
+                
+                if ((key.equals("1")) && (!rightDirection)) {
+                    leftDirection = true;
+                    upDirection = false;
+                    downDirection = false;
+                }
 
-            if ((key == KeyEvent.VK_LEFT) && (!rightDirection)) {
-                leftDirection = true;
-                upDirection = false;
-                downDirection = false;
+                if ((key.equals("3")) && (!leftDirection)) {
+                    rightDirection = true;
+                    upDirection = false;
+                    downDirection = false;
+                }
+
+                if ((key.equals("2")) && (!downDirection)) {
+                    upDirection = true;
+                    leftDirection = false;
+                    rightDirection = false;
+                }
+
+                if ((key.equals("4")) && (!upDirection)) {
+                    downDirection = true;
+                    leftDirection = false;
+                    rightDirection = false;
+                }
             }
-
-            if ((key == KeyEvent.VK_RIGHT) && (!leftDirection)) {
-                rightDirection = true;
-                upDirection = false;
-                downDirection = false;
-            }
-
-            if ((key == KeyEvent.VK_UP) && (!downDirection)) {
-                upDirection = true;
-                leftDirection = false;
-                rightDirection = false;
-            }
-
-            if ((key == KeyEvent.VK_DOWN) && (!upDirection)) {
-                downDirection = true;
-                leftDirection = false;
-                rightDirection = false;
+            catch (IOException evt) {
+                JOptionPane.showMessageDialog(null, evt);
             }
         }
     }

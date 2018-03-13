@@ -52,8 +52,8 @@ public class Snake extends javax.swing.JFrame implements Runnable {
                 opponent = new Snake(1);
                 new Thread(player).start();
                 new Thread(opponent).start();
-                //player.setVisible(true);
-                //opponent.setVisible(true);
+                player.setVisible(true);
+                opponent.setVisible(true);
             }
         });
     }
