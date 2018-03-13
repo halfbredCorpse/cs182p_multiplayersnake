@@ -39,13 +39,11 @@ public class SnakeOpponentPanel extends javax.swing.JPanel implements ActionList
     private Image ball, apple, head;
     
     private SnakeOpponentPanel sop;
-    private static Socket socket;
-    private static DataInputStream input;
+
     private String key;
     
     private DatagramSocket datagramSocket;
     private DatagramPacket packet;
-    private InetAddress ipadd;
     private final int BYTE_SIZE = 1024;
     private byte byteBuffer[] = new byte[BYTE_SIZE];
     
@@ -94,9 +92,6 @@ public class SnakeOpponentPanel extends javax.swing.JPanel implements ActionList
     
     private void initGame() {
         try {
-            socket = new Socket("localhost", 4321);
-            input = new DataInputStream(socket.getInputStream());
-            
             datagramSocket = new DatagramSocket(4321);
             packet = new DatagramPacket(byteBuffer, BYTE_SIZE);
             

@@ -31,9 +31,11 @@ public class Snake_UI extends javax.swing.JFrame {
         Thread player = new Thread(sp),
                opponent = new Thread(sop);
         
+        player.setPriority(10);
+        opponent.setPriority(9);
         player.start();
-
         opponent.start();
+        
         
         
         
