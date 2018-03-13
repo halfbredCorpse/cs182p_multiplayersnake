@@ -5,7 +5,11 @@
  */
 package com.snakeUI;
 
+import java.util.List;
+import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
+import java.io.*;
+import java.util.ArrayList;
 
 /**
  *
@@ -34,6 +38,7 @@ public class PlayerName extends javax.swing.JPanel {
         jLabel1 = new javax.swing.JLabel();
         jTextField1 = new javax.swing.JTextField();
         jButton1 = new javax.swing.JButton();
+        jButton2 = new javax.swing.JButton();
 
         setBackground(new java.awt.Color(0, 33, 0));
 
@@ -49,9 +54,22 @@ public class PlayerName extends javax.swing.JPanel {
         jButton1.setFont(f.returnFont("joystix monospace.ttf", 16f));
         jButton1.setForeground(new java.awt.Color(0, 33, 0));
         jButton1.setText("PLAY!");
+        jButton1.setMaximumSize(new java.awt.Dimension(203, 25));
+        jButton1.setMinimumSize(new java.awt.Dimension(203, 25));
+        jButton1.setPreferredSize(new java.awt.Dimension(203, 25));
         jButton1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButton1ActionPerformed(evt);
+            }
+        });
+
+        jButton2.setBackground(new java.awt.Color(0, 238, 0));
+        jButton2.setFont(f.returnFont("joystix monospace.ttf", 16f));
+        jButton2.setForeground(new java.awt.Color(0, 33, 0));
+        jButton2.setText("CHECK PLAYERS REGISTERED");
+        jButton2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton2ActionPerformed(evt);
             }
         });
 
@@ -59,14 +77,16 @@ public class PlayerName extends javax.swing.JPanel {
         this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jLabel1)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 155, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, 206, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(73, Short.MAX_VALUE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(jButton1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jLabel1)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jTextField1))
+                    .addComponent(jButton2, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 364, Short.MAX_VALUE))
+                .addGap(24, 24, 24))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -75,22 +95,58 @@ public class PlayerName extends javax.swing.JPanel {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel1)
                     .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(33, 33, 33)
-                .addComponent(jButton1)
-                .addContainerGap(159, Short.MAX_VALUE))
+                .addGap(12, 12, 12)
+                .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jButton2)
+                .addContainerGap(142, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         // TODO add your handling code here:
-        SwingUtilities. windowForComponent(this).dispose();
-        
-        new Snake_UI().setVisible(true);
+        if(jTextField1.getText().equals(""))
+            JOptionPane.showMessageDialog(null, "Please input a name.", "Input Name", JOptionPane.WARNING_MESSAGE);
+        else {
+            try(BufferedWriter br = new BufferedWriter(new FileWriter("txts/players.txt", true))) {
+                br.write(jTextField1.getText()+"\n");
+            }
+            catch(IOException e) {
+                e.printStackTrace();
+            }
+            
+            SwingUtilities. windowForComponent(this).dispose();
+            new Snake_UI().setVisible(true);
+        }
     }//GEN-LAST:event_jButton1ActionPerformed
+
+    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+        // TODO add your handling code here:
+        try (BufferedReader br = new BufferedReader(new FileReader("txts/players.txt"))) {
+            String line;
+            List<String> playerNames = new ArrayList();
+            
+            while((line=br.readLine()) != null) {
+                playerNames.add(line);
+            }
+            
+            String message = "";
+            
+            for(String playerName:playerNames) {
+                message += playerName + "\n";
+            }
+            
+            JOptionPane.showMessageDialog(null, message, "Registered Players", JOptionPane.PLAIN_MESSAGE);
+        }
+        catch(IOException e) {
+            e.printStackTrace();
+        }
+    }//GEN-LAST:event_jButton2ActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton1;
+    private javax.swing.JButton jButton2;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JTextField jTextField1;
     // End of variables declaration//GEN-END:variables

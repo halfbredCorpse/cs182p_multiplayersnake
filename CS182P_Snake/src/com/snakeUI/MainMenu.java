@@ -130,6 +130,7 @@ public class MainMenu extends javax.swing.JFrame {
             playerPanel.setLocation(160, 220);
             playerPanel.setSize(500, 200);
             mainPanel.add(playerPanel);
+            playerPanel.requestFocusInWindow();
         }
     }//GEN-LAST:event_formKeyPressed
 
