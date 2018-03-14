@@ -68,12 +68,9 @@ public class SnakeOpponentPanel extends javax.swing.JPanel implements ActionList
      */
     public SnakeOpponentPanel() {
         initComponents();
-        
-        
     }    
     
     public void run() {
-        setFocusable(true);
         setPreferredSize(new Dimension(B_WIDTH, B_HEIGHT));
         loadImages();
         initGame();  
@@ -127,10 +124,7 @@ public class SnakeOpponentPanel extends javax.swing.JPanel implements ActionList
             locateApple();
 
             timer = new Timer(DELAY, this);
-            timer.start();
-            
-            //new CheckMove().start();
-
+            timer.start();           
         }
         catch (IOException e) {
             JOptionPane.showMessageDialog(null, e);
@@ -192,27 +186,34 @@ public class SnakeOpponentPanel extends javax.swing.JPanel implements ActionList
 
     private void checkApple() {
         if ((x[0] == apple_x) && (y[0] == apple_y)) {
-            dots++;
+            try {
+                datagramSocket.receive(packet);
+                dots = Integer.parseInt(new String(packet.getData(), 0, packet.getLength()));
+            }
+            catch (IOException e) {
+                JOptionPane.showMessageDialog(null, e);
+            }
+            
             locateApple();
         }
     }
 
     private void move() {
-        for (int z = dots; z > 0; z--) {
-            x[z] = x[(z - 1)];
-            y[z] = y[(z - 1)];
+        for (int i= dots; i > 0; i--) {
+            x[i] = x[(i - 1)]; 
+            y[i] = y[(i - 1)];
         }
 
-        if (leftDirection)
+        if (leftDirection)  
             x[0] -= DOT_SIZE;
-
-        if (rightDirection)
+        
+        if (rightDirection) 
             x[0] += DOT_SIZE;
 
         if (upDirection) 
             y[0] -= DOT_SIZE;
-
-        if (downDirection)
+        
+        if (downDirection) 
             y[0] += DOT_SIZE;
     }
 
@@ -263,8 +264,6 @@ public class SnakeOpponentPanel extends javax.swing.JPanel implements ActionList
         public void run() {
             try {
                 while (inGame) {
-                    //key = input.readUTF();
-                    
                     datagramSocket.receive(packet);
                     key = new String(packet.getData(), 0, packet.getLength());
                     
@@ -301,8 +300,6 @@ public class SnakeOpponentPanel extends javax.swing.JPanel implements ActionList
     
     public void checkMove() {
         try {    
-            //key = input.readUTF();
-
             datagramSocket.receive(packet);
             key = new String(packet.getData(), 0, packet.getLength());
 
