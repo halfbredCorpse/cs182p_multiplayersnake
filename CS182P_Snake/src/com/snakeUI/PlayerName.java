@@ -11,8 +11,6 @@ import javax.swing.SwingUtilities;
 import java.io.*;
 import java.util.ArrayList;
 
-import com.snake.Snake_UI;
-
 /**
  *
  * @author Jasmin Rose
@@ -139,6 +137,8 @@ public class PlayerName extends javax.swing.JPanel {
         // TODO add your handling code here:
         if(jTextField1.getText().equals(""))
             JOptionPane.showMessageDialog(null, "Please input a name.", "Input Name", JOptionPane.WARNING_MESSAGE);
+        else if(playerNames.contains(jTextField1.getText().toUpperCase())) 
+            JOptionPane.showMessageDialog(null, "Player already registered.");
         else {
             try(BufferedWriter br = new BufferedWriter(new FileWriter("txts/players.txt", true))) {
                 br.write(jTextField1.getText().toUpperCase()+"\n");
@@ -148,8 +148,8 @@ public class PlayerName extends javax.swing.JPanel {
             }
             
             SwingUtilities. windowForComponent(this).dispose();
-            Snake_UI s = new Snake_UI();
-            s.setVisible(true);
+            Snake_UI sn = new Snake_UI();
+            sn.setVisible(true);
         }
     }//GEN-LAST:event_jButton1ActionPerformed
 
@@ -183,7 +183,7 @@ public class PlayerName extends javax.swing.JPanel {
             new File("txts/players.txt").delete();
             temp.renameTo(new File("txts/players.txt"));
             
-            JOptionPane.showMessageDialog(null, "Successfully removed " + jTextField1.getText() + " from players list!");
+            JOptionPane.showMessageDialog(null, "Successfully removed " + jTextField1.getText().toUpperCase() + " from players list!");
             jTextField1.setText("");
         }
         else 

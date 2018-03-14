@@ -1,4 +1,4 @@
-package com.snake;
+package com.snakeUI;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -39,9 +39,13 @@ public class SnakeOpponentPanel extends javax.swing.JPanel implements ActionList
     private Image ball, apple, head;
     
     private SnakeOpponentPanel sop;
-    private static Socket socket;
-    private static DataInputStream input;
+
     private String key;
+    
+    private DatagramSocket datagramSocket;
+    private DatagramPacket packet;
+    private final int BYTE_SIZE = 1024;
+    private byte byteBuffer[] = new byte[BYTE_SIZE];
     
     /**
      *
@@ -64,6 +68,8 @@ public class SnakeOpponentPanel extends javax.swing.JPanel implements ActionList
      */
     public SnakeOpponentPanel() {
         initComponents();
+        
+        
     }    
     
     public void run() {
@@ -71,8 +77,6 @@ public class SnakeOpponentPanel extends javax.swing.JPanel implements ActionList
         setPreferredSize(new Dimension(B_WIDTH, B_HEIGHT));
         loadImages();
         initGame();  
-        
-        new CheckMove().start();
     }
     
     private void loadImages() {
@@ -88,18 +92,24 @@ public class SnakeOpponentPanel extends javax.swing.JPanel implements ActionList
     
     private void initGame() {
         try {
-            socket = new Socket("localhost", 4321);
-            input = new DataInputStream(socket.getInputStream());
+            datagramSocket = new DatagramSocket(4321);
+            packet = new DatagramPacket(byteBuffer, BYTE_SIZE);
             
             String xArray, yArray,
                    xArr[], yArr[];
             
-            dots = Integer.parseInt(input.readUTF());
+            //dots = Integer.parseInt(input.readUTF());
+            datagramSocket.receive(packet);
+            dots = Integer.parseInt(new String(packet.getData(), 0, packet.getLength()));
 
-            xArray = input.readUTF();
+            //xArray = input.readUTF();
+            datagramSocket.receive(packet);
+            xArray = new String(packet.getData(), 0, packet.getLength());
             xArr = xArray.split("\t");
             
-            yArray = input.readUTF();
+            //yArray = input.readUTF();
+            datagramSocket.receive(packet);
+            yArray = new String(packet.getData(), 0, packet.getLength());
             yArr = yArray.split("\t");
             
             for (int i = 0; i < xArr.length; i++) {
@@ -118,6 +128,8 @@ public class SnakeOpponentPanel extends javax.swing.JPanel implements ActionList
 
             timer = new Timer(DELAY, this);
             timer.start();
+            
+            //new CheckMove().start();
 
         }
         catch (IOException e) {
@@ -206,11 +218,12 @@ public class SnakeOpponentPanel extends javax.swing.JPanel implements ActionList
 
     private void checkCollision() {
         try {
-            String check = input.readUTF();
-            
+            datagramSocket.receive(packet);
+            String check = new String(packet.getData(), 0, packet.getLength());
+                    
             if (check.equals("0"))
                 inGame = true;
-            else if (input.readUTF().equals("-1"))
+            else if (check.equals("-1"))
                 inGame = false;
             
             if (!inGame)
@@ -223,8 +236,11 @@ public class SnakeOpponentPanel extends javax.swing.JPanel implements ActionList
 
     private void locateApple() {
         try {
-            apple_x = Integer.parseInt(input.readUTF());
-            apple_y = Integer.parseInt(input.readUTF());
+            datagramSocket.receive(packet);
+            apple_x = Integer.parseInt(new String(packet.getData(), 0, packet.getLength()));
+            
+            datagramSocket.receive(packet);
+            apple_y = Integer.parseInt(new String(packet.getData(), 0, packet.getLength()));
         }
         catch (IOException e) { 
             JOptionPane.showMessageDialog(null, e);
@@ -236,6 +252,7 @@ public class SnakeOpponentPanel extends javax.swing.JPanel implements ActionList
         if (inGame) {
             checkApple();
             checkCollision();
+            checkMove();
             move();
         }
 
@@ -245,8 +262,11 @@ public class SnakeOpponentPanel extends javax.swing.JPanel implements ActionList
     public class CheckMove extends Thread {
         public void run() {
             try {
-                do {
-                    key = input.readUTF();
+                while (inGame) {
+                    //key = input.readUTF();
+                    
+                    datagramSocket.receive(packet);
+                    key = new String(packet.getData(), 0, packet.getLength());
                     
                     if ((key.equals("1")) && (!rightDirection)) {
                         leftDirection = true;
@@ -271,11 +291,47 @@ public class SnakeOpponentPanel extends javax.swing.JPanel implements ActionList
                         rightDirection = false;
                         leftDirection = false;
                     } 
-                } while (inGame);
+                }
             }
             catch (IOException e) {
                 JOptionPane.showMessageDialog(null, e);    
             }   
+        }
+    }
+    
+    public void checkMove() {
+        try {    
+            //key = input.readUTF();
+
+            datagramSocket.receive(packet);
+            key = new String(packet.getData(), 0, packet.getLength());
+
+            if ((key.equals("1")) && (!rightDirection)) {
+                leftDirection = true;
+                upDirection = false;
+                downDirection = false;
+            }
+
+            if ((key.equals("3")) && (!leftDirection)) {
+                rightDirection = true;
+                upDirection = false;
+                downDirection = false;
+            }
+
+            if ((key.equals("2")) && (!downDirection)) {
+                upDirection = true;
+                rightDirection = false;
+                leftDirection = false;
+            }
+
+            if ((key.equals("4")) && (!upDirection)) {
+                downDirection = true;
+                rightDirection = false;
+                leftDirection = false;
+            } 
+        }
+        catch (IOException e) {
+            JOptionPane.showMessageDialog(null, e);    
         }
     }
     
