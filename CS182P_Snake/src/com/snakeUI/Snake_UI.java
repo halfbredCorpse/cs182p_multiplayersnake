@@ -1,14 +1,11 @@
 package com.snakeUI;
 
-import java.awt.Color;
-import java.awt.Dimension;
 import javax.swing.JFrame;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
 
 public class Snake_UI extends javax.swing.JFrame {
     
     FontChooser f = new FontChooser();
+    SnakePanel sp;
     
     public Snake_UI() {
         initSnakePanels();
@@ -21,7 +18,7 @@ public class Snake_UI extends javax.swing.JFrame {
      */
         
     public void initSnakePanels() {
-        SnakePanel sp = new SnakePanel();
+        sp = new SnakePanel();
         this.setLayout(null);
         sp.setBounds(80, 70, sp.getbWidth(), sp.getbHeight());
         add(sp);
@@ -50,6 +47,8 @@ public class Snake_UI extends javax.swing.JFrame {
         mainPanel = new javax.swing.JPanel();
         p1Label = new javax.swing.JLabel();
         p2Label = new javax.swing.JLabel();
+        p2Score = new javax.swing.JLabel();
+        p1Score = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Snake Game: Player Screen");
@@ -66,15 +65,27 @@ public class Snake_UI extends javax.swing.JFrame {
         p2Label.setForeground(new java.awt.Color(0, 238, 0));
         p2Label.setText("Player 2");
 
+        p2Score.setFont(f.returnFont("joystix monospace.ttf", 14f));
+        p2Score.setForeground(new java.awt.Color(0, 238, 0));
+        p2Score.setText("Score: ");
+
+        p1Score.setFont(f.returnFont("joystix monospace.ttf", 14f));
+        p1Score.setForeground(new java.awt.Color(0, 238, 0));
+        p1Score.setText("Score: ");
+
         javax.swing.GroupLayout mainPanelLayout = new javax.swing.GroupLayout(mainPanel);
         mainPanel.setLayout(mainPanelLayout);
         mainPanelLayout.setHorizontalGroup(
             mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(mainPanelLayout.createSequentialGroup()
                 .addGap(191, 191, 191)
-                .addComponent(p1Label)
+                .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(p1Label)
+                    .addComponent(p1Score))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 276, Short.MAX_VALUE)
-                .addComponent(p2Label)
+                .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(p2Label)
+                    .addComponent(p2Score))
                 .addGap(170, 170, 170))
         );
         mainPanelLayout.setVerticalGroup(
@@ -84,7 +95,11 @@ public class Snake_UI extends javax.swing.JFrame {
                 .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(p1Label)
                     .addComponent(p2Label))
-                .addContainerGap(418, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 334, Short.MAX_VALUE)
+                .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(p1Score)
+                    .addComponent(p2Score))
+                .addGap(68, 68, 68))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -137,6 +152,8 @@ public class Snake_UI extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel mainPanel;
     private javax.swing.JLabel p1Label;
+    public javax.swing.JLabel p1Score;
     private javax.swing.JLabel p2Label;
+    public javax.swing.JLabel p2Score;
     // End of variables declaration//GEN-END:variables
 }

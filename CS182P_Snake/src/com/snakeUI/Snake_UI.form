@@ -46,11 +46,17 @@
       <Layout>
         <DimensionLayout dim="0">
           <Group type="103" groupAlignment="0" attributes="0">
-              <Group type="102" alignment="0" attributes="0">
-                  <EmptySpace min="-2" pref="191" max="-2" attributes="0"/>
-                  <Component id="p1Label" min="-2" max="-2" attributes="0"/>
+              <Group type="102" attributes="0">
+                  <EmptySpace min="191" pref="191" max="-2" attributes="0"/>
+                  <Group type="103" groupAlignment="0" attributes="0">
+                      <Component id="p1Label" alignment="0" min="-2" max="-2" attributes="0"/>
+                      <Component id="p1Score" alignment="0" min="-2" max="-2" attributes="0"/>
+                  </Group>
                   <EmptySpace pref="276" max="32767" attributes="0"/>
-                  <Component id="p2Label" min="-2" max="-2" attributes="0"/>
+                  <Group type="103" groupAlignment="0" attributes="0">
+                      <Component id="p2Label" min="-2" max="-2" attributes="0"/>
+                      <Component id="p2Score" min="-2" max="-2" attributes="0"/>
+                  </Group>
                   <EmptySpace min="-2" pref="170" max="-2" attributes="0"/>
               </Group>
           </Group>
@@ -63,7 +69,12 @@
                       <Component id="p1Label" alignment="3" min="-2" max="-2" attributes="0"/>
                       <Component id="p2Label" alignment="3" min="-2" max="-2" attributes="0"/>
                   </Group>
-                  <EmptySpace pref="418" max="32767" attributes="0"/>
+                  <EmptySpace pref="334" max="32767" attributes="0"/>
+                  <Group type="103" groupAlignment="3" attributes="0">
+                      <Component id="p1Score" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="p2Score" alignment="3" min="-2" max="-2" attributes="0"/>
+                  </Group>
+                  <EmptySpace min="-2" pref="68" max="-2" attributes="0"/>
               </Group>
           </Group>
         </DimensionLayout>
@@ -90,6 +101,34 @@
             </Property>
             <Property name="text" type="java.lang.String" value="Player 2"/>
           </Properties>
+        </Component>
+        <Component class="javax.swing.JLabel" name="p2Score">
+          <Properties>
+            <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+              <Connection code="f.returnFont(&quot;joystix monospace.ttf&quot;, 14f)" type="code"/>
+            </Property>
+            <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
+              <Color blue="0" green="ee" red="0" type="rgb"/>
+            </Property>
+            <Property name="text" type="java.lang.String" value="Score: "/>
+          </Properties>
+          <AuxValues>
+            <AuxValue name="JavaCodeGenerator_VariableModifier" type="java.lang.Integer" value="1"/>
+          </AuxValues>
+        </Component>
+        <Component class="javax.swing.JLabel" name="p1Score">
+          <Properties>
+            <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+              <Connection code="f.returnFont(&quot;joystix monospace.ttf&quot;, 14f)" type="code"/>
+            </Property>
+            <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
+              <Color blue="0" green="ee" red="0" type="rgb"/>
+            </Property>
+            <Property name="text" type="java.lang.String" value="Score: "/>
+          </Properties>
+          <AuxValues>
+            <AuxValue name="JavaCodeGenerator_VariableModifier" type="java.lang.Integer" value="1"/>
+          </AuxValues>
         </Component>
       </SubComponents>
     </Container>

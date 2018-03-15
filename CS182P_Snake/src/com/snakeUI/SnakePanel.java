@@ -189,32 +189,49 @@ public class SnakePanel extends javax.swing.JPanel implements ActionListener, Ru
 
     private void checkApple() {
         if ((x[0] == apple_x) && (y[0] == apple_y)) {
-            dots++;
+            try {
+                dots++;
+                packet = new DatagramPacket(Integer.toString(dots).getBytes(), Integer.toString(dots).length(), ipadd, 4321);
+                datagramSocket.send(packet);
+            }
+            catch (IOException e) {
+                JOptionPane.showMessageDialog(null, e);
+            }
+            
             locateApple();
         }
     }
 
     private void move() {
-        for (int z = dots; z > 0; z--) {
-            x[z] = x[(z - 1)];
-            
-            y[z] = y[(z - 1)];
-        }
-
-        if (leftDirection) 
-            x[0] -= DOT_SIZE;
-
-        if (rightDirection)
-            x[0] += DOT_SIZE;
-
-        if (upDirection) 
-            y[0] -= DOT_SIZE;
-
-        if (downDirection) 
-            y[0] += DOT_SIZE;
-        
         keyString = "";
         
+        for (int i = dots; i > 0; i--) {
+            x[i] = x[(i - 1)]; 
+            y[i] = y[(i - 1)];
+        }
+
+        if (leftDirection) {
+            x[0] -= DOT_SIZE;
+            keyString = "1";
+        }
+            
+            
+        if (rightDirection) {
+            x[0] += DOT_SIZE;
+            keyString = "3";
+        }
+            
+        if (upDirection) {
+            y[0] -= DOT_SIZE;
+            keyString = "2";
+        }
+            
+            
+        if (downDirection) {
+            y[0] += DOT_SIZE;
+            keyString = "4";
+        }
+            
         try {
             packet = new DatagramPacket(keyString.getBytes(), keyString.length(), ipadd, 4321);
             datagramSocket.send(packet);
@@ -226,12 +243,13 @@ public class SnakePanel extends javax.swing.JPanel implements ActionListener, Ru
 
     private void checkCollision() {
         try {
-            for (int z = dots; z > 0; z--) {
-                if ((z > 4) && (x[0] == x[z]) && (y[0] == y[z])) {
+            for (int i = dots; i > 0; i--) {
+                if ((i > 4) && (x[0] == x[i]) && (y[0] == y[i])) {
                     inGame = false;
                     
                     packet = new DatagramPacket("-1".getBytes(),"-1".length(), ipadd, 4321);
                     datagramSocket.send(packet);
+                    break;
                 }
             }
 
@@ -245,8 +263,7 @@ public class SnakePanel extends javax.swing.JPanel implements ActionListener, Ru
             if (inGame) {
                 packet = new DatagramPacket("0".getBytes(), "0".length(), ipadd, 4321);
                 datagramSocket.send(packet);
-            }
-                
+            }    
             else
                 timer.stop();
         }
@@ -326,9 +343,10 @@ public class SnakePanel extends javax.swing.JPanel implements ActionListener, Ru
                     
                     keyString = "3";
                     
-                    
+                    /*
                     packet = new DatagramPacket("3".getBytes(), "3".length(), ipadd, 4321);
                     datagramSocket.send(packet);
+                    */
                     
                 }
 
@@ -339,9 +357,10 @@ public class SnakePanel extends javax.swing.JPanel implements ActionListener, Ru
                     
                     keyString = "2";
                     
-                    
+                    /*
                     packet = new DatagramPacket("2".getBytes(), "2".length(), ipadd, 4321);
                     datagramSocket.send(packet);
+                    */
                     
                 }
 
@@ -350,17 +369,28 @@ public class SnakePanel extends javax.swing.JPanel implements ActionListener, Ru
                     rightDirection = false;
                     leftDirection = false;
                     
-                   keyString = "4";
+                    keyString = "4";
                     
-                    
+                    /*
                     packet = new DatagramPacket("4".getBytes(), "4".length(), ipadd, 4321);
                     datagramSocket.send(packet);
+                    */
                     
                 }   
             }
             catch (IOException evt) {
                 JOptionPane.showMessageDialog(null, evt);
             }            
+        }
+        
+        public void keyReleased(KeyEvent e) {
+            try {
+                packet = new DatagramPacket("".getBytes(), "".length(), ipadd, 4321);
+                datagramSocket.send(packet);
+            }
+            catch (IOException evt) {
+                JOptionPane.showMessageDialog(null, evt);
+            }
         }
     }
     
